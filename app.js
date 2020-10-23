@@ -8,13 +8,17 @@ var expressHbs = require('express-handlebars');
 var mongoose = require('mongoose');
 
 var routes = require('./routes/index');
-
+var Handlebars = require('handlebars')
+const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-access');
 var app = express();
 
-mongoose.connect('localhost:27017/shopping');
+mongoose.connect('mongodb://localhost:27017/shopping', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
 
 // view engine setup
-app.engine('.hbs', expressHbs({defaultLayout: 'layout', extname: '.hbs'}));
+app.engine('.hbs', expressHbs({defaultLayout:'layout', extname:'.hbs', handlebars: allowInsecurePrototypeAccess(Handlebars)}));
 app.set('view engine', '.hbs');
 
 // uncomment after placing your favicon in /public
