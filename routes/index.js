@@ -4,8 +4,12 @@ var Cart = require('../models/cart');
 
 var Product = require('../models/product');
 var Order = require('../models/order');
+var mongoose = require('mongoose');
+
+
 
 /* GET home page. */
+
 router.get('/', function (req, res, next) {
     var successMsg = req.flash('success')[0];
     Product.find(function (err, docs) {
@@ -59,6 +63,12 @@ router.get('/shopping-cart', function(req, res, next) {
     res.render('shop/shopping-cart', {products: cart.generateArray(), totalPrice: cart.totalPrice});
 });
 
+router.get('/profile', isLoggedIn, function (req, res, next) {
+    var cart = new Cart(req.session.cart);
+     res.render('user/profile', {products: cart.generateArray(), totalPrice: cart.totalPrice});
+     
+        
+});
 router.get('/checkout', isLoggedIn, function(req, res, next) {
     if (!req.session.cart) {
         return res.redirect('/shopping-cart');
@@ -73,34 +83,22 @@ router.post('/checkout', isLoggedIn, function(req, res, next) {
         return res.redirect('/shopping-cart');
     }
     var cart = new Cart(req.session.cart);
-    
-    var stripe = require("stripe")(
-        "sk_test_fwmVPdJfpkmwlQRedXec5IxR"
-    );
-
-    stripe.charges.create({
-        amount: cart.totalPrice * 100,
-        currency: "usd",
-        source: req.body.stripeToken, // obtained with Stripe.js
-        description: "Test Charge"
-    }, function(err, charge) {
-        if (err) {
-            req.flash('error', err.message);
-            return res.redirect('/checkout');
-        }
-        var order = new Order({
+	 var order = new Order({
             user: req.user,
             cart: cart,
             address: req.body.address,
             name: req.body.name,
-            paymentId: charge.id
+           
         });
         order.save(function(err, result) {
             req.flash('success', 'Successfully bought product!');
             req.session.cart = null;
             res.redirect('/');
+			
         });
-    }); 
+   
+     
+    
 });
 
 module.exports = router;

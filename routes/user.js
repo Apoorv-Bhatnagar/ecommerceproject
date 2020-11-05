@@ -2,12 +2,17 @@ var express = require('express');
 var router = express.Router();
 var csrf = require('csurf');
 var passport = require('passport');
+var Product = require('../models/product');
 
 var Order = require('../models/order');
 var Cart = require('../models/cart');
 
 var csrfProtection = csrf();
 router.use(csrfProtection);
+
+
+
+
 
 router.get('/profile', isLoggedIn, function (req, res, next) {
     Order.find({user: req.user}, function(err, orders) {
